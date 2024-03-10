@@ -1,4 +1,3 @@
-import { type ValidationError } from 'class-validator'
 import inspector from 'inspector'
 import pino, { type Logger as PinoLogger } from 'pino'
 
@@ -42,7 +41,7 @@ export class Logger {
     this.logger.warn(message)
   }
 
-  error(message: string, error?: Error | ValidationError[]): void {
+  error(message: string, error?: any): void {
     this.logger.error(error, message)
   }
 }

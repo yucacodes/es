@@ -11,14 +11,29 @@ const config: RollupOptions = {
     tsc(),
     alias(),
     commonjs(),
-    nodeResolve({ preferBuiltins: true }),
+    nodeResolve({
+      preferBuiltins: true,
+      resolveOnly: [
+        'tsyringe',
+        'pino',
+        'express',
+        'class-transformer',
+        'class-validator',
+        'socket.io',
+      ],
+    }),
     json(),
   ],
   output: {
-    preserveModules: true,
     dir: 'dist',
     format: 'es',
+    preserveModulesRoot: 'src',
   },
-  external: ['crypto', 'http', 'inspector'],
+  onwarn: function (warning, handler) {
+    if (warning.code === 'THIS_IS_UNDEFINED') {
+      return
+    }
+    handler(warning)
+  },
 }
 export default config

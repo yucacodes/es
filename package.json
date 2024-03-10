@@ -1,12 +1,13 @@
 {
-  "name": "es",
+  "name": "@yucacodes/es",
   "version": "1.0.0",
+  "private": "false",
   "description": "",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rollup --config rollup.config.ts --configPlugin typescript",
+    "build": "rollup --config rollup.config.ts --configPlugin typescript && tsc --declaration --emitDeclarationOnly",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

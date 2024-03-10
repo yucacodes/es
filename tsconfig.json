@@ -7,7 +7,10 @@
     "outDir": "dist",
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outFile": "dist/index.ts"
   },
   "include": ["src", "rollup.config.ts"]
 }
