@@ -1,9 +1,9 @@
-import type { RollupOptions } from 'rollup'
-import tsc from '@rollup/plugin-typescript'
 import alias from '@rollup/plugin-alias'
 import commonjs from '@rollup/plugin-commonjs'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
 import json from '@rollup/plugin-json'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import tsc from '@rollup/plugin-typescript'
+import type { RollupOptions } from 'rollup'
 
 const config: RollupOptions = {
   input: 'src/index.ts',
@@ -13,14 +13,6 @@ const config: RollupOptions = {
     commonjs(),
     nodeResolve({
       preferBuiltins: true,
-      resolveOnly: [
-        'tsyringe',
-        'pino',
-        'express',
-        'class-transformer',
-        'class-validator',
-        'socket.io',
-      ],
     }),
     json(),
   ],

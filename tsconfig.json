@@ -4,13 +4,9 @@
     "target": "ES2022",
     "moduleResolution": "Bundler",
     "esModuleInterop": true,
-    "outDir": "dist",
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outFile": "dist/index.ts"
+    "emitDecoratorMetadata": true
   },
   "include": ["src", "rollup.config.ts"]
 }

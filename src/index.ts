@@ -1,16 +1,16 @@
+export { Type } from 'class-transformer'
 export {
   IsAlpha,
   IsAlphanumeric,
   IsDate,
   IsDateString,
-  IsNotEmpty,
-  IsString,
   IsIn,
   IsInstance,
+  IsNotEmpty,
   IsNotIn,
   IsOptional,
+  IsString,
 } from 'class-validator'
-export { Type } from 'class-transformer'
 export {
   Authorization,
   AutoMapper,
@@ -21,9 +21,9 @@ export {
 } from './application'
 export {
   TimeProvider,
-  generatePasswordHash,
-  generateSecureRandomSecretString,
-  verifyPasswordHash,
+  hashPassword,
+  secureSecret,
+  verifyPassword,
 } from './domain'
 export { implementation } from './implementation'
 export {

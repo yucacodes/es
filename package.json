@@ -1,13 +1,14 @@
 {
   "name": "@yucacodes/es",
-  "version": "1.0.0",
-  "private": "false",
+  "version": "0.0.2",
   "description": "",
   "type": "module",
+  "main": "dist/index.js",
   "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
+  "files": ["dist"],
   "scripts": {
-    "build": "rollup --config rollup.config.ts --configPlugin typescript && tsc --declaration --emitDeclarationOnly",
+    "build": "rollup --config rollup.config.ts --configPlugin typescript && tsc --declaration --emitDeclarationOnly --declarationDir dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -21,11 +22,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.11.25",
     "rollup": "^4.12.1",
-    "typescript": "^5.4.2"
-  },
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "class-transform": "^0.7.0",
+    "typescript": "^5.4.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "express": "^4.18.3",
