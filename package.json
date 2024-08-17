@@ -35,7 +35,8 @@
     "reflect-metadata": "*",
     "socket.io": "*",
     "short-uuid": "*",
-    "tsyringe": "*"
+    "tsyringe": "*",
+    "@types/express": "*"
   },
   "dependencies": {
     "tslib": "^2.6.3"

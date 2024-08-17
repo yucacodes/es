@@ -23,7 +23,7 @@ export abstract class Time {
   inverse(amountOfTime: AmountOfTime): AmountOfTime {
     const out = Object.assign({}, amountOfTime)
     for (const key in out) {
-      out[key] = -out[key]
+      (out as any)[key] = -(out as any)[key]
     }
     return out
   }
