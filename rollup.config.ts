@@ -16,9 +16,21 @@ const config: RollupOptions = {
     }),
     json(),
   ],
+  external: [
+    'class-transformer',
+    'class-validator',
+    'socket.io',
+    'tslib',
+    'reflect-metadata',
+    'pino',
+    'express',
+    'short-uuid',
+    'tsyringe',
+  ],
   output: {
     dir: 'dist',
     format: 'es',
+    preserveModules: true,
     preserveModulesRoot: 'src',
   },
   onwarn: function (warning, handler) {

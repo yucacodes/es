@@ -17,7 +17,7 @@ export class SocketEventsBus extends EventsBus {
     private socketsServer: SocketsServer,
     private socket: Socket | null,
     private controlledEvent: string,
-    private eventCount: number
+    private eventCount: number,
   ) {
     super()
     this.logger = new Logger(`${controlledEvent}:EventsBus`)
@@ -27,13 +27,15 @@ export class SocketEventsBus extends EventsBus {
     const handler = this.handlers.get(notification.event.constructor)
     if (!handler)
       throw new Error(
-        `Not found Emmiter for ${notification.event.constructor.name}`
+        `Not found Emmiter for ${notification.event.constructor.name}`,
       )
     const out = handler.mapper.map(notification.event)
-    const origin = this.socket ?? this.socketsServer
+    const origin = notification.includeOrigin
+      ? this.socketsServer
+      : this.socket ?? this.socketsServer
     origin.in(notification.channel).emit(handler.event, out)
     this.logger.info(
-      `(${this.eventCount}) emmited '${handler.event}' to channel '${notification.channel}'`
+      `(${this.eventCount}) emmited '${handler.event}' to channel '${notification.channel}'`,
     )
   }
 
@@ -42,7 +44,7 @@ export class SocketEventsBus extends EventsBus {
       throw `Not way to subscribe to channel out a socket context`
     this.socket.join(subscription.channel)
     this.logger.info(
-      `(${this.eventCount}) subscription to channel '${subscription.channel}'`
+      `(${this.eventCount}) subscription to channel '${subscription.channel}'`,
     )
   }
 
@@ -51,7 +53,7 @@ export class SocketEventsBus extends EventsBus {
       throw `Not way to unsubscribe from channel out a socket context`
     this.socket.leave(subscription.channel)
     this.logger.info(
-      `(${this.eventCount}) cancel subscription to channel '${subscription.channel}'`
+      `(${this.eventCount}) cancel subscription to channel '${subscription.channel}'`,
     )
   }
 }

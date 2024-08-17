@@ -1,6 +1,7 @@
 export interface Notification<E extends Object> {
   event: E
   channel: string
+  includeOrigin?: boolean
 }
 
 export interface Subscription {

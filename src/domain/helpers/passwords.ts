@@ -1,4 +1,4 @@
-import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
+import { randomBytes, scrypt, scryptSync, timingSafeEqual } from 'crypto'
 
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString('hex')
@@ -9,6 +9,14 @@ export async function hashPassword(password: string) {
     })
   })
 }
+
+
+export function hashPasswordSync(password: string) {
+  const salt = randomBytes(16).toString('hex')
+  const buf = scryptSync(password, salt, 64)
+  return `${buf.toString('hex')}.${salt}`
+}
+
 
 export async function verifyPassword(
   hash: string,
@@ -22,4 +30,14 @@ export async function verifyPassword(
       resolve(timingSafeEqual(hashedPasswordBuf, suppliedPasswordBuf))
     })
   })
+}
+
+export function verifyPasswordSync(
+  hash: string,
+  password: string,
+) {
+  const [hashedPassword, salt] = hash.split('.')
+  const hashedPasswordBuf = Buffer.from(hashedPassword, 'hex')
+  const suppliedPasswordBuf = scryptSync(password, salt, 64)
+  return timingSafeEqual(hashedPasswordBuf, suppliedPasswordBuf)
 }

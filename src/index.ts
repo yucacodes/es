@@ -10,6 +10,9 @@ export {
   IsNotIn,
   IsOptional,
   IsString,
+  IsNumber,
+  Max,
+  Min
 } from 'class-validator'
 export {
   Authorization,
@@ -22,8 +25,11 @@ export {
 export {
   TimeProvider,
   hashPassword,
+  hashPasswordSync,
   secureSecret,
   verifyPassword,
+  verifyPasswordSync,
+  shortUUID,
 } from './domain'
 export { implementation } from './implementation'
 export {
@@ -39,7 +45,11 @@ export {
   eventController,
   socketAuthProvider,
   type SocketEmit,
+  type SocketCallback,
   type SocketListener,
+  type SocketErrorResult,
+  type SocketSuccessResult,
+  type SocketResult
 } from './presentation'
 
 export { CollectionsMapper } from './mapper'
