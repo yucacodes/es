@@ -3,8 +3,10 @@ import { validate } from 'class-validator'
 import { type Constructor } from '../generics'
 import { injectable, type DependencyContainer } from '../injection'
 import { Logger } from '../logger'
-import { Authorization } from './authorization'
-
+import { Mapper } from '../mapper'
+import { NODE_ENV } from '../node-env'
+import { Auth } from './authorization'
+import { AutoMapper } from './auto-mapper'
 
 export type UseCase<Req, Res> = {
   perform(request: Req): Promise<Res>
@@ -22,16 +24,14 @@ export type useCaseConfigValidation<Req> =
   | useCaseConfigWithRequestValidator<Req>
   | useCaseConfigWithoutRequestValidator
 
-export type useCaseConfigForAnyRole = {
-  allowAnyRole: true
-}
-
 export type useCaseConfigForSingleRole<Req> = {
-  allowRole: string | ((req: Req) => string)
+  scope: string | ((req: Req) => string)
+  allowRole: string
 }
 
 export type useCaseConfigForMultipleRoles<Req> = {
-  allowRoles: string[] | ((req: Req) => string[])
+  scope: string | ((req: Req) => string)
+  allowRoles: string[]
 }
 
 export type useCaseConfigForNoAuthorization = {
@@ -39,13 +39,12 @@ export type useCaseConfigForNoAuthorization = {
 }
 
 export type useCaseConfigAuthorization<Req> =
-  | useCaseConfigForAnyRole
   | useCaseConfigForSingleRole<Req>
   | useCaseConfigForMultipleRoles<Req>
   | useCaseConfigForNoAuthorization
 
 export type useCaseConfig<Req> = useCaseConfigAuthorization<Req> &
-  useCaseConfigValidation<Req>
+  useCaseConfigValidation<Req> & { responseMapper?: Mapper<any, any> }
 
 export function useCase<Req>(config: useCaseConfig<Req>) {
   return <Res>(constructor: Constructor<UseCase<Req, Res>>) => {
@@ -53,16 +52,19 @@ export function useCase<Req>(config: useCaseConfig<Req>) {
     const __perform__ = constructor.prototype.perform as Function
 
     constructor.prototype.perform = async function perform(
-      req: Req
+      req: Req,
     ): Promise<Res> {
       const __request__ = await performRequestValidation(req, config, logger)
       await performAuthValidation(
         __request__,
         config,
         logger,
-        this.__container__
+        this.__container__,
       )
-      return __perform__.apply(this, [__request__])
+      const response = await __perform__.apply(this, [__request__])
+      return config.responseMapper
+        ? config.responseMapper.map(response)
+        : new AutoMapper().map(response)
     }
 
     injectable()(constructor)
@@ -72,7 +74,7 @@ export function useCase<Req>(config: useCaseConfig<Req>) {
 async function performRequestValidation(
   req: any,
   config: useCaseConfigValidation<any>,
-  logger: Logger
+  logger: Logger,
 ) {
   const requestValidator = (config as useCaseConfigWithRequestValidator<any>)
     .requestValidator
@@ -93,39 +95,50 @@ async function performAuthValidation(
   req: any,
   config: useCaseConfigAuthorization<any>,
   logger: Logger,
-  container: DependencyContainer
+  container: DependencyContainer,
 ) {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if ((config as useCaseConfigForNoAuthorization).disableAuthValidation) {
     return
   }
-  const { allowRole, allowRoles, allowAnyRole } = config as Partial<
-    useCaseConfigForSingleRole<any> &
-      useCaseConfigForMultipleRoles<any> &
-      useCaseConfigForAnyRole
+  const { allowRole, allowRoles, scope } = config as Partial<
+    useCaseConfigForSingleRole<any> & useCaseConfigForMultipleRoles<any>
   >
+
+  let __scope__: string | undefined = undefined
+
+  if (typeof scope == 'function') {
+    __scope__ = scope(req)
+  } else if (typeof scope == 'string') {
+    __scope__ = scope
+  } else if (!scope && NODE_ENV === 'production') {
+    throw new Error(
+      `Invalid UseCase config, for production is required define a scope for auth validation`,
+    )
+  }
 
   let __allowRoles__: string[] = []
 
-  if (typeof allowRole == 'function') {
-    __allowRoles__ = [allowRole(req)]
-  } else if (typeof allowRole == 'string') {
+  if (typeof allowRole == 'string') {
     __allowRoles__ = [allowRole]
-  } else if (typeof allowRoles == 'function') {
-    __allowRoles__ = allowRoles(req)
   } else if (Array.isArray(allowRoles)) {
     __allowRoles__ = allowRoles
-  } else if (!allowAnyRole) {
-    throw new Error(`Invalid UseCase config`)
+  } else {
+    throw new Error(
+      `Invalid UseCase config, is required indicate allowed roles`,
+    )
   }
 
-  const authorization = container.resolve(
-    Authorization as any
-  ) as Authorization<any>
+  const authorization = container.resolve(Auth as any) as Auth
   const roles = authorization.roles()
-  if (allowAnyRole && roles.length > 0) return
+
   for (const allowedRole of __allowRoles__) {
-    if (roles.includes(allowedRole)) {
+    if (
+      roles
+        .filter((x) => x.scope === __scope__ || __scope__ == undefined)
+        .map((x) => x.role)
+        .includes(allowedRole)
+    ) {
       return true
     }
   }

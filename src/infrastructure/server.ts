@@ -1,4 +1,4 @@
-import { TimeProvider } from '../domain'
+import { Time } from '../domain'
 import type { Application } from 'express'
 import { default as express } from 'express'
 import { createServer, type Server as HttpServer } from 'http'
@@ -35,8 +35,8 @@ export abstract class Server {
   private socketsServer: SocketsServer
   private eventsEmiters: Map<Function, SocketEventEmitter>
   private eventsControllers: SocketEventController[]
-  private socketAuthProvider: SocketAuthProvider<any> | null = null
-  private httpAuthProvider: HttpAuthProvider<any> | null = null
+  private socketAuthProvider: SocketAuthProvider | null = null
+  private httpAuthProvider: HttpAuthProvider | null = null
 
   constructor() {
     this.expressApp = express()
@@ -60,7 +60,7 @@ export abstract class Server {
   }
 
   private registerImplementations() {
-    container.register(TimeProvider as any, ServerTimeProvider)
+    container.register(Time as any, ServerTimeProvider)
     const { implementations } = this.__config__()
     implementations?.forEach((x) => {
       if (x === false) return

@@ -1,12 +1,12 @@
 import type { Socket } from 'socket.io'
-import { Authorization, EventsBus } from '../../application'
+import { Auth, EventsBus } from '../../application'
 
 import type { Server as SocketsServer } from 'socket.io'
 import { container, type DependencyContainer } from '../../injection'
 import { Logger } from '../../logger'
 import type { InlineEventControllerConfig } from '../controller'
 import type { SocketAuthProvider } from './socket-auth-provider'
-import { SocketAuthorization } from './socket-authorization'
+import { SocketAuth } from './socket-authorization'
 import type { SocketEventEmitter } from './socket-events-bus'
 import { SocketEventsBus } from './socket-events-bus'
 import { type SocketCallback } from './sockets-types'
@@ -18,7 +18,7 @@ export abstract class SocketEventController {
   constructor(
     private controledEvent: string,
     private socketsServer: SocketsServer,
-    private authProvider: SocketAuthProvider<any> | null,
+    private authProvider: SocketAuthProvider | null,
     private eventsEmiters: Map<Function, SocketEventEmitter>
   ) {
     this.logger = new Logger(`${controledEvent}:Controller`)
@@ -34,8 +34,8 @@ export abstract class SocketEventController {
       try {
         this.logger.info(`(${eventId}) received`)
         const requestContainer = container.createChildContainer()
-        requestContainer.register(Authorization as any, {
-          useValue: new SocketAuthorization(
+        requestContainer.register(Auth as any, {
+          useValue: new SocketAuth(
             this.authProvider,
             socket,
             this.controledEvent,
@@ -72,7 +72,7 @@ export class SocketEventControllerForUseCase extends SocketEventController {
   constructor(
     private inlineConfig: InlineEventControllerConfig,
     socketsServer: SocketsServer,
-    authProvider: SocketAuthProvider<any> | null,
+    authProvider: SocketAuthProvider | null,
     eventsEmiters: Map<Function, SocketEventEmitter>
   ) {
     super(inlineConfig.event, socketsServer, authProvider, eventsEmiters)

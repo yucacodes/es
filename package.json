@@ -1,6 +1,6 @@
 {
   "name": "@yucacodes/es",
-  "version": "0.0.16",
+  "version": "1.0.1",
   "description": "",
   "type": "module",
   "main": "dist/index.js",

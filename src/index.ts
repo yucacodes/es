@@ -1,4 +1,4 @@
-export { Type } from 'class-transformer'
+export { Type, Transform } from 'class-transformer'
 export {
   IsAlpha,
   IsAlphanumeric,
@@ -15,7 +15,7 @@ export {
   Min
 } from 'class-validator'
 export {
-  Authorization,
+  Auth,
   AutoMapper,
   EventsBus,
   autoMapper,
@@ -23,13 +23,14 @@ export {
   useCase,
 } from './application'
 export {
-  TimeProvider,
+  Time,
   hashPassword,
   hashPasswordSync,
   secureSecret,
   verifyPassword,
   verifyPasswordSync,
   shortUUID,
+  newId,
 } from './domain'
 export { implementation } from './implementation'
 export {
