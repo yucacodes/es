@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "build": "rollup --config rollup.config.ts --configPlugin typescript && tsc --declaration --emitDeclarationOnly --declarationDir dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --import @yucacodes/ts/src/custom-import.mjs  --test **/**/*.test.ts",
+    "test:watch": "node --watch --import @yucacodes/ts/src/custom-import.mjs  --test **/**/*.test.ts"
   },
   "author": "",
   "license": "ISC",
@@ -23,20 +24,21 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.11.25",
+    "@yucacodes/ts": "^0.0.4",
     "rollup": "^4.12.1",
     "tsyringe": "4.8.0",
     "typescript": "^5.4.2"
   },
   "peerDependencies": {
+    "@types/express": "*",
     "class-transformer": "*",
     "class-validator": "*",
     "express": "*",
     "pino": "*",
     "reflect-metadata": "*",
-    "socket.io": "*",
     "short-uuid": "*",
-    "tsyringe": "*",
-    "@types/express": "*"
+    "socket.io": "*",
+    "tsyringe": "*"
   },
   "dependencies": {
     "tslib": "^2.6.3"

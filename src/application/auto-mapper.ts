@@ -1,5 +1,5 @@
-import { singleton } from '../injection'
 import { type Constructor } from '../generics'
+import { container, singleton } from '../injection'
 import { type Mapper } from '../mapper'
 
 export interface DtoAutoMapperConfig {
@@ -15,7 +15,7 @@ const autoMapperConfigsStack: DtoAutoMapperConfig[] = [
 export class AutoMapper {
   private __config__(): DtoAutoMapperConfig {
     throw new Error(
-      'Should use @dtoAutoMapper decorator for config AutoMapper '
+      'Should use @dtoAutoMapper decorator for config AutoMapper ',
     )
   }
 
@@ -86,12 +86,12 @@ export type autoMapperConfig = Constructor<Mapper<any, any>>[]
 
 export function autoMapper(config: autoMapperConfig) {
   return (constructor: Constructor<AutoMapper>) => {
-    const mappersMap = new Map(
-      config.map((x) => [x.prototype.__config__().model, x])
+    const modelMappers = new Map(
+      config.map((x) => [x.prototype.__config__().model, container.resolve(x)]),
     )
     constructor.prototype.__config__ = function __config__() {
       return {
-        mappersMap,
+        modelMappers,
       }
     }
     singleton()(constructor)
