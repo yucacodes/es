@@ -106,14 +106,15 @@ describe(`${AutoMapper.name}`, () => {
 
     assert.deepEqual(valueMap, value)
   })
+
+  test('throws when map unknown model', () => {
+    const mapper = new AutoMapper()
+    const value = new Date()
+  
+    assert.throws(() => mapper.map(value))
+  })
 })
 
-test('fails when map unknown model', () => {
-  const mapper = new AutoMapper()
-  const value = new Date()
-
-  assert.throws(() => mapper.map(value), Error)
-})
 
 describe(`@${autoMapper.name}`, () => {
   test('extends known models mappers', () => {

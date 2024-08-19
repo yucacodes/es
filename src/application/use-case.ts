@@ -4,9 +4,9 @@ import { type Constructor } from '../generics'
 import { injectable, type DependencyContainer } from '../injection'
 import { Logger } from '../logger'
 import { Mapper } from '../mapper'
-import { NODE_ENV } from '../node-env'
 import { Auth } from './authorization'
 import { AutoMapper } from './auto-mapper'
+import { BadRequest, Unauthorized } from './errors'
 
 export type UseCase<Req, Res> = {
   perform(request: Req): Promise<Res>
@@ -55,10 +55,12 @@ export function useCase<Req>(config: useCaseConfig<Req>) {
       req: Req,
     ): Promise<Res> {
       const __request__ = await performRequestValidation(req, config, logger)
+
       await performAuthValidation(
         __request__,
         config,
         logger,
+        this.auth,
         this.__container__,
       )
       const response = await __perform__.apply(this, [__request__])
@@ -85,7 +87,7 @@ async function performRequestValidation(
     const requestErrors = await validate(__request__ as any)
     if (requestErrors.length > 0) {
       logger.error(`Bad Request`, requestErrors)
-      throw new Error('Bad Request')
+      throw new BadRequest('Bad Request', requestErrors)
     }
   }
   return __request__
@@ -95,6 +97,7 @@ async function performAuthValidation(
   req: any,
   config: useCaseConfigAuthorization<any>,
   logger: Logger,
+  auth: Auth | undefined,
   container: DependencyContainer,
 ) {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -105,15 +108,15 @@ async function performAuthValidation(
     useCaseConfigForSingleRole<any> & useCaseConfigForMultipleRoles<any>
   >
 
-  let __scope__: string | undefined = undefined
+  let __scope__: string = ''
 
   if (typeof scope == 'function') {
     __scope__ = scope(req)
   } else if (typeof scope == 'string') {
     __scope__ = scope
-  } else if (!scope && NODE_ENV === 'production') {
+  } else if (!scope) {
     throw new Error(
-      `Invalid UseCase config, for production is required define a scope for auth validation`,
+      `Invalid UseCase config, s required define a scope for auth validation`,
     )
   }
 
@@ -129,13 +132,16 @@ async function performAuthValidation(
     )
   }
 
-  const authorization = container.resolve(Auth as any) as Auth
+  const authorization =
+    auth && auth instanceof Auth
+      ? auth
+      : (container.resolve(Auth as any) as Auth)
   const roles = authorization.roles()
 
   for (const allowedRole of __allowRoles__) {
     if (
       roles
-        .filter((x) => x.scope === __scope__ || __scope__ == undefined)
+        .filter((x) => x.scope === __scope__)
         .map((x) => x.role)
         .includes(allowedRole)
     ) {
@@ -143,5 +149,10 @@ async function performAuthValidation(
     }
   }
 
-  throw new Error(`Not allow action for provided authorization roles`)
+  throw new Unauthorized(
+    `Not allow action for provided authorization roles`,
+    authorization.get(),
+    __scope__,
+    __allowRoles__,
+  )
 }
