@@ -4,50 +4,63 @@ import { autoMapper, AutoMapper } from './auto-mapper'
 import { DateToISOStringMapper, DateToMillisTimestampMapper } from './mappers'
 
 describe(`${AutoMapper.name}`, () => {
-  test('Map string to string', () => {
+  test('map string to string', () => {
     const mapper = new AutoMapper()
     const value = 'any-string'
 
     const valueMap = mapper.map(value)
 
-    assert.equal(valueMap, value)
+    assert.strictEqual(valueMap, value)
   })
 
-  test('Map number to number', () => {
+  test('map number to number', () => {
     const mapper = new AutoMapper()
     const value = 1982
 
     const valueMap = mapper.map(value)
 
-    assert.equal(valueMap, value)
+    assert.strictEqual(valueMap, value)
   })
 
-  test('Map bool to bool', () => {
+  test('map bigint to string', () => {
+    const mapper = new AutoMapper()
+    const value = BigInt(
+      '99999999999999999999999999999999999999999999999999999',
+    )
+
+    const valueMap = mapper.map(value)
+    assert.strictEqual(
+      valueMap,
+      '99999999999999999999999999999999999999999999999999999',
+    )
+  })
+
+  test('map bool to bool', () => {
     const mapper = new AutoMapper()
 
-    assert.equal(mapper.map(true), true)
-    assert.equal(mapper.map(false), false)
+    assert.strictEqual(mapper.map(true), true)
+    assert.strictEqual(mapper.map(false), false)
   })
 
-  test('Map null to null', () => {
+  test('map null to null', () => {
     const mapper = new AutoMapper()
     const value = null
 
     const valueMap = mapper.map(value)
 
-    assert.equal(valueMap, value)
+    assert.strictEqual(valueMap, value)
   })
 
-  test('Map undefined to undefined', () => {
+  test('map undefined to undefined', () => {
     const mapper = new AutoMapper()
     const value = undefined
 
     const valueMap = mapper.map(value)
 
-    assert.equal(valueMap, value)
+    assert.strictEqual(valueMap, value)
   })
 
-  test('Map plain object', () => {
+  test('map plain object', () => {
     const mapper = new AutoMapper()
     const value = {
       foo: 'foo',
@@ -59,7 +72,7 @@ describe(`${AutoMapper.name}`, () => {
     assert.deepEqual(valueMap, value)
   })
 
-  test('Map nested object', () => {
+  test('map nested object', () => {
     const mapper = new AutoMapper()
     const value = {
       foo: 'foo',
@@ -76,7 +89,7 @@ describe(`${AutoMapper.name}`, () => {
     assert.deepEqual(valueMap, value)
   })
 
-  test('Map plain array', () => {
+  test('map plain array', () => {
     const mapper = new AutoMapper()
     const value = [1, 2, 'foo']
 
@@ -85,7 +98,7 @@ describe(`${AutoMapper.name}`, () => {
     assert.deepEqual(valueMap, value)
   })
 
-  test('Map nested array', () => {
+  test('map nested array', () => {
     const mapper = new AutoMapper()
     const value = [1, 2, 'foo', [3, 4]]
 
@@ -95,7 +108,7 @@ describe(`${AutoMapper.name}`, () => {
   })
 })
 
-test('Fails when map unknown model', () => {
+test('fails when map unknown model', () => {
   const mapper = new AutoMapper()
   const value = new Date()
 
@@ -103,7 +116,7 @@ test('Fails when map unknown model', () => {
 })
 
 describe(`@${autoMapper.name}`, () => {
-  test('Extends known models mappers', () => {
+  test('extends known models mappers', () => {
     @autoMapper([DateToISOStringMapper])
     class Mapper extends AutoMapper {}
     const mapper = new Mapper()
@@ -111,7 +124,7 @@ describe(`@${autoMapper.name}`, () => {
     assert.doesNotThrow(() => mapper.map(new Date()))
   })
 
-  test('Extends known models for diferent auto mappers', () => {
+  test('extends known models for diferent auto mappers', () => {
     @autoMapper([DateToISOStringMapper])
     class Mapper1 extends AutoMapper {}
     const mapper1 = new Mapper1()
@@ -125,7 +138,7 @@ describe(`@${autoMapper.name}`, () => {
     assert.equal(typeof mapper2.map(new Date()), 'number')
   })
 
-  test('Not modify previous mappers config', () => {
+  test('not modify previous mappers config', () => {
     @autoMapper([DateToISOStringMapper])
     class Mapper1 extends AutoMapper {}
 

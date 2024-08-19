@@ -11,8 +11,8 @@
   ],
   "scripts": {
     "build": "rollup --config rollup.config.ts --configPlugin typescript && tsc --declaration --emitDeclarationOnly --declarationDir dist",
-    "test": "node --import @yucacodes/ts/src/custom-import.mjs  --test **/**/*.test.ts",
-    "test:watch": "node --watch --import @yucacodes/ts/src/custom-import.mjs  --test **/**/*.test.ts"
+    "test": "node --import @yucacodes/ts/src/custom-import.mjs  --test ./src/**/*.test.ts ./src/**/**/*.test.ts",
+    "test:watch": "node --watch --import @yucacodes/ts/src/custom-import.mjs  --test ./src/**/*.test.ts ./src/**/**/*.test.ts"
   },
   "author": "",
   "license": "ISC",

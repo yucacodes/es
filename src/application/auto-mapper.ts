@@ -37,10 +37,11 @@ export class AutoMapper {
       type === 'string' ||
       type === 'number' ||
       type === 'boolean' ||
-      type === 'undefined' ||
-      type === 'bigint'
+      type === 'undefined'
     ) {
       return model
+    } else if (type === 'bigint') {
+      return model.toString()
     } else if (type === 'object') {
       return this.mapObject(model, modelMappers)
     } else {
