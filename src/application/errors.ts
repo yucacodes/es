@@ -10,7 +10,7 @@ export class BadRequest extends Error {
 export class Unauthorized extends Error {
   constructor(
     message: string,
-    public supliedAuth: AuthInfo,
+    public supliedAuth: AuthInfo | null,
     public scope: string,
     public allowedRoles: string[],
   ) {
