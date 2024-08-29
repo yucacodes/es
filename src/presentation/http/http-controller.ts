@@ -4,11 +4,10 @@ import { type Constructor } from '../../generics'
 export const httpControllerType = 'HTTPController'
 
 export type HttpController = {
-  all?(req: IncomingMessage, res: ServerResponse): Promise<void>
-  get?(req: IncomingMessage, res: ServerResponse): Promise<void>
-  post?(req: IncomingMessage, res: ServerResponse): Promise<void>
-  put?(req: IncomingMessage, res: ServerResponse): Promise<void>
-  delete?(req: IncomingMessage, res: ServerResponse): Promise<void>
+  GET?(req: IncomingMessage, res: ServerResponse): Promise<void>
+  POST?(req: IncomingMessage, res: ServerResponse): Promise<void>
+  PUT?(req: IncomingMessage, res: ServerResponse): Promise<void>
+  DELETE?(req: IncomingMessage, res: ServerResponse): Promise<void>
 }
 
 export interface httpControllerConfig {

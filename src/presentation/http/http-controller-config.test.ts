@@ -14,7 +14,7 @@ describe('Http controller config', () => {
     }
 
     const config: HttpControllerConfigForUseCase = {
-      method: 'get',
+      method: 'GET',
       path: 'any/path',
       useCase: MyUseCase,
     }
@@ -42,7 +42,7 @@ describe('Http controller config', () => {
 
   test(`determine when config is controller class`, () => {
     class MyController {
-      async get() {}
+      async GET() {}
     }
 
     assert.equal(isHttpControllerClassConfig(MyController), true)
@@ -59,15 +59,15 @@ describe('Http controller config', () => {
   test(`list Http Methods for controller class`, () => {
     class MyController {
       async any() {}
-      async delete() {}
+      async DELETE() {}
       async other() {}
-      async get() {}
+      async GET() {}
     }
 
     const list = listHttpMethodsForControllerClass(MyController)
 
-    assert(list.includes('delete'))
-    assert(list.includes('get'))
+    assert(list.includes('DELETE'))
+    assert(list.includes('GET'))
     assert(list.length === 2)
   })
 })

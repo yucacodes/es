@@ -1,3 +1,3 @@
-export const allHttpMethods = ['get', 'post', 'put', 'delete', 'all'] as const
+export const allHttpMethods = ['GET', 'POST', 'PUT', 'DELETE'] as const
 
 export type HttpMethod = (typeof allHttpMethods)[number]
