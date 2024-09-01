@@ -36,25 +36,35 @@ export class HttpControllerWrapper {
     const config = extractHttpControllerClassConfig(ctor)
     const methods = listHttpMethodsForControllerClass(ctor)
     for (let method of methods) {
-      const methodHandler = this.router[method.toLowerCase()]
+      const lcMethod = method.toLowerCase()
+      const methodHandler = this.router[lcMethod]
       if (!methodHandler) throw new Error(`Not supported router`)
       methodHandler.apply(this.router, [
         config.path,
-        (req, res) => {
+        async (req, res, next) => {
           const requestContainer = this.pupulateRequestContainer(req, res)
           const controller = requestContainer.resolve(ctor)
-          controller[method] && controller[method](req, res)
+          const fnMethod = controller[method]
+          if (fnMethod) {
+            await fnMethod(req, res)
+          } else {
+            // TODO: Response Not found
+          }
+          if (typeof next == 'function' && next.name == 'next') {
+            next()
+          }
         },
       ])
     }
   }
 
   private configForUseCase(config: HttpControllerConfigForUseCase) {
-    const methodHandler = this.router[config.method.toLowerCase()]
+    const lcMethod = config.method.toLowerCase()
+    const methodHandler = this.router[lcMethod]
     if (!methodHandler) throw new Error(`Not supported router`)
     methodHandler.apply(this.router, [
       config.path,
-      async (req, res) => {
+      async (req, res, next) => {
         const requestContainer = this.pupulateRequestContainer(req, res)
         const useCase = requestContainer.resolve(config.useCase)
         const useCaseRequest = Object.assign(
@@ -65,6 +75,9 @@ export class HttpControllerWrapper {
         )
         const out = await useCase.perform(useCaseRequest)
         res.end(JSON.stringify(out), 'utf-8')
+        if (typeof next == 'function' && next.name == 'next') {
+          next()
+        }
       },
     ])
   }

@@ -192,7 +192,7 @@ describe(`@${useCase.name}`, () => {
     )
   })
 
-  test('shold resolve dynamic scope', async () => {
+  test('should resolve dynamic scope', async () => {
     class MyRequest {
       id: string = ''
     }
