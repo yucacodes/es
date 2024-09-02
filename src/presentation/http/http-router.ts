@@ -1,7 +1,9 @@
 import { HttpMiddleware } from './http-middleware'
 // export type HttpRouter = fmw.Instance<fmw.HTTPVersion.V1>
+
 export type HttpRouter = {
-  [method: string]:
-    | undefined
-    | ((path: string, handler: HttpMiddleware) => void)
+  get: undefined | ((path: string, handler: HttpMiddleware) => void)
+  post: undefined | ((path: string, handler: HttpMiddleware) => void)
+  put: undefined | ((path: string, handler: HttpMiddleware) => void)
+  delete: undefined | ((path: string, handler: HttpMiddleware) => void)
 }

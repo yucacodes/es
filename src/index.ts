@@ -35,7 +35,7 @@ export {
 export { implementation } from './implementation'
 export {
   DboCollectionsMapper,
-  Server,
+  Server as Server,
   dboMapper,
   server,
 } from './infrastructure'

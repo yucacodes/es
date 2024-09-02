@@ -1,77 +1,55 @@
 import { Time } from '../domain'
-import { type Constructor } from '../generics'
 import type { implementationConfig } from '../implementation'
-import { container } from '../injection'
+import { container, DependencyContainer } from '../injection'
 import { Logger } from '../logger'
 import {
-  AuthProviderConfig,
   HttpAuthProvider,
-  HttpControllerConfig,
   HttpControllerWrapper,
   HttpRouter,
   isHttpControllerConfig,
-  SocketAuthProvider,
-  socketAuthProviderDecoratorToken,
-  SocketEventEmitter,
-  type EmitterConfig
 } from '../presentation'
+import { ServerConfig } from './server-config'
 import { ServerTimeProvider } from './server-time-provider'
 
 export interface ServerRunConfig {
   port: number
 }
 
-export abstract class Server {
-  private logger = new Logger('Server')
-  private eventsEmiters: Map<Function, SocketEventEmitter>
+export class Server {
+  private logger = new Logger('EasyServer')
   private httpControllers: HttpControllerWrapper[]
-  //private eventsControllers: EventController[]
-  private socketAuthProvider: SocketAuthProvider | null = null
   private httpAuthProviders: HttpAuthProvider[] = []
-  private httpAuthProvider: HttpAuthProvider | null = null
-  private httpRouter: HttpRouter = '' as any
+  private container: DependencyContainer
 
-  constructor() {
-    this.registerImplementations()
-    this.resolveAuthProviders()
-    this.eventsEmiters = this.resolveEventsEmitters()
-    // this.eventsControllers = this.resolveEventsControllers()
-    this.httpControllers = this.resolveHTTPControllers()
-    // this.addEventsListeners()
+  constructor(config: ServerConfig, router: HttpRouter) {
+    this.container = container.createChildContainer()
+    this.registerInjections(config)
+    // this.resolveAuthProviders()
+    this.httpControllers = this.resolveHTTPControllers(config, router)
   }
 
-  // run(runConfig: ServerRunConfig) {
-  //   this.httpServer.listen(runConfig.port, () => {
-  //     this.logger.info(`Running on port ${runConfig.port}`)
-  //   })
-  // }
-
-  private __config__(): serverConfig {
-    throw new Error(`Should config the server using @server decorator`)
-  }
-
-  private registerImplementations() {
-    container.register(Time as any, ServerTimeProvider)
-    const { implementations } = this.__config__()
-    implementations?.forEach((x) => {
+  private registerInjections(config: ServerConfig) {
+    this.container.register(Time as any, ServerTimeProvider)
+    const { injections } = config
+    injections?.forEach((x) => {
       if (x === false) return
       ;[x].flat().forEach((x) => {
         const config = x.prototype.__config__() as implementationConfig<any>
-        if (config.base) container.register(config.base as any, x)
+        if (config.base) this.container.register(config.base as any, x)
       })
     })
   }
 
-  private resolveAuthProviders() {
-    const { authProviders } = this.__config__()
-    authProviders?.forEach((x) => {
-      if ((x as any)[socketAuthProviderDecoratorToken]) {
-        this.socketAuthProvider = container.resolve(x as any)
-      } else {
-        throw new Error(`Not supported auth provider`)
-      }
-    })
-  }
+  // private resolveAuthProviders() {
+  //   const { authProviders } = this.__config__()
+  //   authProviders?.forEach((x) => {
+  //     if ((x as any)[socketAuthProviderDecoratorToken]) {
+  //       this.socketAuthProvider = container.resolve(x as any)
+  //     } else {
+  //       throw new Error(`Not supported auth provider`)
+  //     }
+  //   })
+  // }
 
   // private addEventsListeners() {
   //   this.socketsServer.listen(this.httpServer)
@@ -87,29 +65,32 @@ export abstract class Server {
   //   })
   // }
 
-  private resolveEventsEmitters(): Map<Function, SocketEventEmitter> {
-    const { emitters } = this.__config__()
-    return new Map(
-      emitters?.map((x) => {
-        return [
-          x.model,
-          { event: x.event, mapper: container.resolve(x.mapper) },
-        ]
-      }),
-    )
-  }
+  // private resolveEventsEmitters(): Map<Function, SocketEventEmitter> {
+  //   const { emitters } = this.__config__()
+  //   return new Map(
+  //     emitters?.map((x) => {
+  //       return [
+  //         x.model,
+  //         { event: x.event, mapper: container.resolve(x.mapper) },
+  //       ]
+  //     }),
+  //   )
+  // }
 
-  private resolveHTTPControllers(): HttpControllerWrapper[] {
-    const { controllers } = this.__config__()
+  private resolveHTTPControllers(
+    config: ServerConfig,
+    router: HttpRouter,
+  ): HttpControllerWrapper[] {
+    const { controllers } = config
     return (
       controllers
         ?.filter((x) => isHttpControllerConfig(x))
         .map(
           (x) =>
             new HttpControllerWrapper(
-              container,
+              this.container,
               x as any,
-              this.httpRouter,
+              router,
               this.httpAuthProviders,
               [],
             ),
@@ -149,24 +130,4 @@ export abstract class Server {
   // ): Constructor<EventController<unknown, unknown>> | undefined {
   //   if (typeof controllerConfig !== 'function') return undefined
   // }
-}
-
-export type ImplementationConfig =
-  | Constructor<Object>
-  | false
-  | Constructor<Object>[]
-
-export interface serverConfig {
-  controllers?: HttpControllerConfig[]
-  emitters?: EmitterConfig[]
-  authProviders?: AuthProviderConfig[]
-  implementations?: ImplementationConfig[]
-}
-
-export function server(config: serverConfig) {
-  return (constructor: Constructor<Server>) => {
-    constructor.prototype.__config__ = function __config__() {
-      return config
-    }
-  }
 }

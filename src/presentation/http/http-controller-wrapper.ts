@@ -14,6 +14,7 @@ import {
   isHttpControllerForUseCaseConfig,
   listHttpMethodsForControllerClass,
 } from './http-controller-config'
+import { HttpMethodLowerCase } from './http-method'
 import { HttpMiddleware } from './http-middleware'
 import { HttpRouter } from './http-router'
 
@@ -36,7 +37,7 @@ export class HttpControllerWrapper {
     const config = extractHttpControllerClassConfig(ctor)
     const methods = listHttpMethodsForControllerClass(ctor)
     for (let method of methods) {
-      const lcMethod = method.toLowerCase()
+      const lcMethod = method.toLowerCase() as HttpMethodLowerCase
       const methodHandler = this.router[lcMethod]
       if (!methodHandler) throw new Error(`Not supported router`)
       methodHandler.apply(this.router, [
@@ -59,7 +60,7 @@ export class HttpControllerWrapper {
   }
 
   private configForUseCase(config: HttpControllerConfigForUseCase) {
-    const lcMethod = config.method.toLowerCase()
+    const lcMethod = config.method.toLowerCase() as HttpMethodLowerCase
     const methodHandler = this.router[lcMethod]
     if (!methodHandler) throw new Error(`Not supported router`)
     methodHandler.apply(this.router, [
