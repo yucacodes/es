@@ -1,4 +1,3 @@
-import { IncomingMessage, ServerResponse } from 'http'
 import { Auth } from '../../application'
 import { Constructor } from '../../generics'
 import { DependencyContainer } from '../../injection'
@@ -14,15 +13,18 @@ import {
   isHttpControllerForUseCaseConfig,
   listHttpMethodsForControllerClass,
 } from './http-controller-config'
-import { HttpMethodLowerCase } from './http-method'
+import { HttpHandler } from './http-handler'
+import { HttpMethod } from './http-method'
 import { HttpMiddleware } from './http-middleware'
+import { HttpRequest } from './http-request'
+import { HttpResponse } from './http-response'
 import { HttpRouter } from './http-router'
 
 export class HttpControllerWrapper {
   constructor(
     private container: DependencyContainer,
     config: HttpControllerConfig,
-    private router: HttpRouter,
+    public router: HttpRouter,
     private authProviders: HttpAuthProvider[],
     private middlewares: HttpMiddleware[],
   ) {
@@ -37,55 +39,42 @@ export class HttpControllerWrapper {
     const config = extractHttpControllerClassConfig(ctor)
     const methods = listHttpMethodsForControllerClass(ctor)
     for (let method of methods) {
-      const lcMethod = method.toLowerCase() as HttpMethodLowerCase
-      const methodHandler = this.router[lcMethod]
-      if (!methodHandler) throw new Error(`Not supported router`)
-      methodHandler.apply(this.router, [
-        config.path,
-        async (req, res, next) => {
-          const requestContainer = this.pupulateRequestContainer(req, res)
-          const controller = requestContainer.resolve(ctor)
-          const fnMethod = controller[method]
-          if (fnMethod) {
-            await fnMethod(req, res)
-          } else {
-            // TODO: Response Not found
-          }
-          if (typeof next == 'function' && next.name == 'next') {
-            next()
-          }
-        },
-      ])
+      this.configForHandler(method, config.path, async (req, res) => {
+        const requestContainer = this.pupulateRequestContainer(req, res)
+        const controller = requestContainer.resolve(ctor)
+        const fnMethod = controller[method]
+        if (!fnMethod) return res.send(404)
+        return await fnMethod.apply(controller, [req, res])
+      })
     }
   }
 
   private configForUseCase(config: HttpControllerConfigForUseCase) {
-    const lcMethod = config.method.toLowerCase() as HttpMethodLowerCase
-    const methodHandler = this.router[lcMethod]
-    if (!methodHandler) throw new Error(`Not supported router`)
-    methodHandler.apply(this.router, [
-      config.path,
-      async (req, res, next) => {
-        const requestContainer = this.pupulateRequestContainer(req, res)
-        const useCase = requestContainer.resolve(config.useCase)
-        const useCaseRequest = Object.assign(
-          {},
-          (req as any).body,
-          (req as any).query,
-          (req as any).params,
-        )
-        const out = await useCase.perform(useCaseRequest)
-        res.end(JSON.stringify(out), 'utf-8')
-        if (typeof next == 'function' && next.name == 'next') {
-          next()
-        }
-      },
-    ])
+    this.configForHandler(config.method, config.path, async (req, res) => {
+      const requestContainer = this.pupulateRequestContainer(req, res)
+      const useCase = requestContainer.resolve(config.useCase)
+      const result = await useCase.perform(req.allData())
+      return res.send(200, config.responseFormat, result)
+    })
+  }
+
+  private configForHandler(
+    method: HttpMethod,
+    path: string,
+    handler: HttpHandler,
+  ) {
+    this.router.on(method, path, async (_req, _res) => {
+      const req = new HttpRequest(_req.socket)
+      const res = new HttpResponse(req)
+      await this.runMiddlewares(req, res)
+      await handler(req, res)
+      return res
+    })
   }
 
   private pupulateRequestContainer(
-    req: IncomingMessage,
-    res: ServerResponse,
+    req: HttpRequest,
+    res: HttpResponse,
   ): DependencyContainer {
     const auth = new HttpAuth(this.authProviders, req, res)
     const requestContainer = this.container.createChildContainer()
@@ -95,10 +84,7 @@ export class HttpControllerWrapper {
     return requestContainer
   }
 
-  private runMiddlewares(
-    req: IncomingMessage,
-    res: ServerResponse,
-  ): Promise<void> {
+  private runMiddlewares(req: HttpRequest, res: HttpResponse): Promise<void> {
     return new Promise((resolve, reject) => {
       let index = 0
 

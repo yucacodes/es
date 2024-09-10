@@ -1,9 +1,15 @@
-import { HttpMiddleware } from './http-middleware'
-// export type HttpRouter = fmw.Instance<fmw.HTTPVersion.V1>
+import { IncomingMessage, ServerResponse } from 'node:http'
+import { HttpMethod } from './http-method'
+import { HttpResponse } from './http-response'
 
-export type HttpRouter = {
-  get: undefined | ((path: string, handler: HttpMiddleware) => void)
-  post: undefined | ((path: string, handler: HttpMiddleware) => void)
-  put: undefined | ((path: string, handler: HttpMiddleware) => void)
-  delete: undefined | ((path: string, handler: HttpMiddleware) => void)
+export interface HttpRouter {
+  on(
+    method: HttpMethod,
+    path: string,
+    listener: (
+      req: IncomingMessage,
+      res: ServerResponse,
+    ) => Promise<HttpResponse>,
+  ): void
+  dispatch(req: IncomingMessage, res: ServerResponse): Promise<void>
 }

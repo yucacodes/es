@@ -2,12 +2,14 @@ import { UseCase } from '../../application'
 import { Constructor } from '../../generics'
 import { HttpController } from './http-controller'
 import { allHttpMethods, HttpMethod } from './http-method'
+import { HttpFormat } from './http-format'
 
 
 export type HttpControllerConfigForUseCase = {
   method: HttpMethod
   path: string
   useCase: Constructor<UseCase<any, any>>
+  responseFormat: HttpFormat
 }
 
 export type HttpControllerConfig =

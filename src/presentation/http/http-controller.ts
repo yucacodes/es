@@ -1,13 +1,15 @@
-import { IncomingMessage, ServerResponse } from 'http'
 import { type Constructor } from '../../generics'
+import { HttpEnd } from './http-end'
+import { HttpRequest } from './http-request'
+import { HttpResponse } from './http-response'
 
 export const httpControllerType = 'HTTPController'
 
 export type HttpController = {
-  GET?(req: IncomingMessage, res: ServerResponse): Promise<void>
-  POST?(req: IncomingMessage, res: ServerResponse): Promise<void>
-  PUT?(req: IncomingMessage, res: ServerResponse): Promise<void>
-  DELETE?(req: IncomingMessage, res: ServerResponse): Promise<void>
+  GET?(req: HttpRequest, res: HttpResponse): Promise<HttpEnd>
+  POST?(req: HttpRequest, res: HttpResponse): Promise<HttpEnd>
+  PUT?(req: HttpRequest, res: HttpResponse): Promise<HttpEnd>
+  DELETE?(req: HttpRequest, res: HttpResponse): Promise<HttpEnd>
 }
 
 export interface httpControllerConfig {
