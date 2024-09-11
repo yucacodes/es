@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser'
 import express from 'express'
 import fmw from 'find-my-way'
 import httpMocks from 'node-mocks-http'
@@ -22,6 +23,10 @@ function routers() {
 
 function methods() {
   return ['GET', 'POST', 'PUT', 'DELETE'] as const
+}
+
+function selectRandom(items: readonly any[]) {
+  return items[Math.floor(Math.random() * items.length)]
 }
 
 describe(`${HttpControllerWrapper.name}`, () => {
@@ -102,5 +107,103 @@ describe(`${HttpControllerWrapper.name}`, () => {
         assert(handledRequest)
       })
     })
+  })
+
+  routers().forEach((router) => {
+    test(`class controller handle ALL methods with ${router.constructor.name}`, async () => {
+      const path = `/some/path`
+      const methodsCalls: string[] = []
+
+      @httpController({ path })
+      class MyHttpController {
+        async ALL(req: HttpRequest, res: HttpResponse) {
+          methodsCalls.push(req.method!)
+          return res.send(200)
+        }
+      }
+
+      const controller = new HttpControllerWrapper(
+        container,
+        MyHttpController,
+        router,
+        [],
+        [],
+      )
+
+      await Promise.all(
+        methods().map(async (method) => {
+          const req = httpMocks.createRequest({ method, path })
+          const res = httpMocks.createResponse()
+          await controller.router.dispatch(req, res)
+        }),
+      )
+
+      assert.deepEqual(methodsCalls, methods())
+    })
+  })
+
+  test(`call middlewares in order`, async () => {
+    const method = selectRandom(methods())
+    const router = selectRandom(routers())
+    const path = `/handle/${method}`
+    const middlewaresCalls: number[] = []
+
+    @httpController({ path })
+    class MyHttpController {
+      async ALL(req: HttpRequest, res: HttpResponse) {
+        return res.send(200)
+      }
+    }
+
+    const controller = new HttpControllerWrapper(
+      container,
+      MyHttpController,
+      router,
+      [],
+      [
+        (req, res, next) => {
+          middlewaresCalls.push(1)
+          next()
+        },
+        (req, res, next) => {
+          middlewaresCalls.push(2)
+          next()
+        },
+      ],
+    )
+
+    const req = httpMocks.createRequest({ method, path })
+    const res = httpMocks.createResponse()
+    await controller.router.dispatch(req, res)
+    assert.deepEqual(middlewaresCalls, [1, 2])
+  })
+
+  test(`works with bodyParser middlewares`, async () => {
+    const method = selectRandom(methods())
+    const router = selectRandom(routers())
+    const path = `/handle/${method}`
+
+    @httpController({ path })
+    class MyHttpController {
+      async ALL(req: HttpRequest, res: HttpResponse) {
+        return res.send(200)
+      }
+    }
+
+    const controller = new HttpControllerWrapper(
+      container,
+      MyHttpController,
+      router,
+      [],
+      [
+        bodyParser.json(),
+        bodyParser.urlencoded({ extended: true }),
+        bodyParser.text(),
+      ],
+    )
+
+    const req = httpMocks.createRequest({ method, path })
+    const res = httpMocks.createResponse()
+    await controller.router.dispatch(req, res)
   })
 })

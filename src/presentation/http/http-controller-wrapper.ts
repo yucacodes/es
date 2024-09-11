@@ -59,12 +59,12 @@ export class HttpControllerWrapper {
   }
 
   private configForHandler(
-    method: HttpMethod,
+    method: HttpMethod | 'ALL',
     path: string,
     handler: HttpHandler,
   ) {
     this.router.on(method, path, async (_req, _res) => {
-      const req = new HttpRequest(_req.socket)
+      const req = new HttpRequest(_req)
       const res = new HttpResponse(req)
       await this.runMiddlewares(req, res)
       await handler(req, res)

@@ -10,6 +10,7 @@ export type HttpController = {
   POST?(req: HttpRequest, res: HttpResponse): Promise<HttpEnd>
   PUT?(req: HttpRequest, res: HttpResponse): Promise<HttpEnd>
   DELETE?(req: HttpRequest, res: HttpResponse): Promise<HttpEnd>
+  ALL?(req: HttpRequest, res: HttpResponse): Promise<HttpEnd>
 }
 
 export interface httpControllerConfig {

@@ -1,9 +1,8 @@
 import { UseCase } from '../../application'
 import { Constructor } from '../../generics'
 import { HttpController } from './http-controller'
-import { allHttpMethods, HttpMethod } from './http-method'
 import { HttpFormat } from './http-format'
-
+import { allHttpMethods, HttpMethod } from './http-method'
 
 export type HttpControllerConfigForUseCase = {
   method: HttpMethod
@@ -16,12 +15,13 @@ export type HttpControllerConfig =
   | HttpControllerConfigForUseCase
   | Constructor<HttpController>
 
-  
+const extendedMethods = [...allHttpMethods, 'ALL'] as const
+
 export function listHttpMethodsForControllerClass(
   config: Constructor<HttpController>,
-): HttpMethod[] {
+): (HttpMethod | 'ALL')[] {
   const classMethods = new Set(Object.getOwnPropertyNames(config.prototype))
-  return allHttpMethods.filter((x) => classMethods.has(x))
+  return extendedMethods.filter((x) => classMethods.has(x))
 }
 
 export function isHttpControllerClassConfig(config: any): boolean {

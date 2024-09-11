@@ -4,7 +4,7 @@ import { HttpResponse } from './http-response'
 
 export interface HttpRouter {
   on(
-    method: HttpMethod,
+    method: HttpMethod | 'ALL',
     path: string,
     listener: (
       req: IncomingMessage,

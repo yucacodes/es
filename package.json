@@ -25,6 +25,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.11.25",
     "@yucacodes/ts": "^0.0.4",
+    "body-parser": "^1.20.3",
     "node-mocks-http": "^1.15.1",
     "rollup": "^4.12.1",
     "tsyringe": "4.8.0",
@@ -42,7 +43,6 @@
     "tsyringe": "*"
   },
   "dependencies": {
-    "body-parser": "^1.20.2",
     "find-my-way": "^8.2.0",
     "tslib": "^2.6.3"
   }
