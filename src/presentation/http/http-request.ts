@@ -9,6 +9,11 @@ export class HttpRequest extends IncomingMessage {
   }
 
   allData(): object {
-    return Object.assign({}, this.body, this.query, this.params)
+    return Object.assign(
+      {},
+      (this as any).body,
+      this.query,
+      (this as any).params,
+    )
   }
 }

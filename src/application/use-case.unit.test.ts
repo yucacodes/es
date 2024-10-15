@@ -17,17 +17,13 @@ class TestAuth extends Auth {
 }
 
 describe(`@${useCase.name}`, () => {
-  test('be able to disable validations', async () => {
-    @useCase({
-      disableAuthValidation: true,
-      disableRequestValidation: true,
-    })
+  test('have disable validations by default', async () => {
+    @useCase()
     class MyUseCase {
       async perform() {}
     }
 
     const myUseCase = new MyUseCase()
-
     await assert.doesNotReject(() => myUseCase.perform())
   })
 
@@ -38,8 +34,7 @@ describe(`@${useCase.name}`, () => {
     }
 
     @useCase({
-      disableAuthValidation: true,
-      requestValidator: MyRequest,
+      requestValidation: MyRequest,
     })
     class MyUseCase {
       async perform(req: MyRequest) {
@@ -59,8 +54,7 @@ describe(`@${useCase.name}`, () => {
     }
 
     @useCase({
-      disableAuthValidation: true,
-      requestValidator: MyRequest,
+      requestValidation: MyRequest,
     })
     class MyUseCase {
       async perform(req: MyRequest) {
@@ -81,9 +75,8 @@ describe(`@${useCase.name}`, () => {
 
   test('performs when scope and role matches', async () => {
     @useCase({
-      scope: 'test',
-      allowRole: 'allowed-role',
-      disableRequestValidation: true,
+      authorizationScope: () => 'test',
+      authorizedRoles: ['allowed-role'],
     })
     class MyUseCase {
       auth: Auth = new TestAuth({
@@ -100,9 +93,8 @@ describe(`@${useCase.name}`, () => {
 
   test('performs when scope match and role is in allowed roles', async () => {
     @useCase({
-      scope: 'test',
-      allowRoles: ['allowed-role-1', 'allowed-role-2', 'allowed-role-3'],
-      disableRequestValidation: true,
+      authorizationScope: () => 'test',
+      authorizedRoles: ['allowed-role-1', 'allowed-role-2', 'allowed-role-3'],
     })
     class MyUseCase {
       auth: Auth = new TestAuth({
@@ -119,9 +111,8 @@ describe(`@${useCase.name}`, () => {
 
   test('throws when scope match but role does not', async () => {
     @useCase({
-      scope: 'test',
-      allowRole: 'allowed-role',
-      disableRequestValidation: true,
+      authorizationScope: () => 'test',
+      authorizedRoles: ['allowed-role'],
     })
     class MyUseCase {
       auth: Auth = new TestAuth({
@@ -144,9 +135,8 @@ describe(`@${useCase.name}`, () => {
 
   test('throws when scope match but role is not in allowed roles', async () => {
     @useCase({
-      scope: 'test',
-      allowRoles: ['allowed-role-1', 'allowed-role-2'],
-      disableRequestValidation: true,
+      authorizationScope: () => 'test',
+      authorizedRoles: ['allowed-role-1', 'allowed-role-2'],
     })
     class MyUseCase {
       auth: Auth = new TestAuth({
@@ -169,9 +159,8 @@ describe(`@${useCase.name}`, () => {
 
   test('throws when scope not match', async () => {
     @useCase({
-      scope: 'test',
-      allowRole: 'allowed-role',
-      disableRequestValidation: true,
+      authorizationScope: () => 'test',
+      authorizedRoles: ['allowed-role'],
     })
     class MyUseCase {
       auth: Auth = new TestAuth({
@@ -185,38 +174,6 @@ describe(`@${useCase.name}`, () => {
 
     await assert.rejects(
       () => myUseCase.perform(),
-      (err: any) => {
-        assert.strictEqual(err.constructor, Unauthorized)
-        return true
-      },
-    )
-  })
-
-  test('should resolve dynamic scope', async () => {
-    class MyRequest {
-      id: string = ''
-    }
-
-    @useCase({
-      scope: (req) => `resource/${req.id}`,
-      allowRole: 'allowed-role',
-      disableRequestValidation: true,
-    })
-    class MyUseCase {
-      auth: Auth = new TestAuth({
-        userId: 'id',
-        roles: [{ scope: 'resource/23', role: 'allowed-role' }],
-      })
-      async perform(req: MyRequest) {
-        return req.id
-      }
-    }
-
-    const myUseCase = new MyUseCase()
-
-    await assert.doesNotReject(() => myUseCase.perform({ id: '23' }))
-    await assert.rejects(
-      () => myUseCase.perform({ id: 'other-id' }),
       (err: any) => {
         assert.strictEqual(err.constructor, Unauthorized)
         return true

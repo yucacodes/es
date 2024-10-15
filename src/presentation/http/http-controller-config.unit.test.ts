@@ -6,6 +6,8 @@ import {
   isHttpControllerForUseCaseConfig,
   listHttpMethodsForControllerClass,
 } from './http-controller-config'
+import { HttpRequest } from './http-request'
+import { HttpResponse } from './http-response'
 
 describe('Http controller config', () => {
   test(`determine when config is for useCase`, () => {
@@ -17,6 +19,7 @@ describe('Http controller config', () => {
       method: 'GET',
       path: 'any/path',
       useCase: MyUseCase,
+      responseFormat: 'json',
     }
 
     assert.equal(isHttpControllerForUseCaseConfig(config), true)
@@ -59,9 +62,15 @@ describe('Http controller config', () => {
   test(`list Http Methods for controller class`, () => {
     class MyController {
       async any() {}
-      async DELETE() {}
-      async other() {}
-      async GET() {}
+      async DELETE(req: HttpRequest, res: HttpResponse) {
+        return res.send(200)
+      }
+      async other(req: HttpRequest, res: HttpResponse) {
+        return res.send(200)
+      }
+      async GET(req: HttpRequest, res: HttpResponse) {
+        return res.send(200)
+      }
     }
 
     const list = listHttpMethodsForControllerClass(MyController)

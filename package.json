@@ -1,6 +1,6 @@
 {
   "name": "@yucacodes/es",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "",
   "type": "module",
   "main": "dist/index.js",
@@ -12,7 +12,8 @@
   "scripts": {
     "build": "rollup --config rollup.config.ts --configPlugin typescript && tsc --declaration --emitDeclarationOnly --declarationDir dist",
     "test": "node --import @yucacodes/ts/src/custom-import.mjs  --test ./src/**/*.test.ts ./src/**/**/*.test.ts",
-    "test:watch": "node --watch --import @yucacodes/ts/src/custom-import.mjs  --test ./src/**/*.test.ts ./src/**/**/*.test.ts"
+    "test:units": "node --import @yucacodes/ts/src/custom-import.mjs  --test ./src/**/*.unit.test.ts ./src/**/**/*.unit.test.ts",
+    "test:integration": "node --import @yucacodes/ts/src/custom-import.mjs  --test ./src/**/*.integration.test.ts"
   },
   "author": "",
   "license": "ISC",

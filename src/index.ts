@@ -35,9 +35,8 @@ export {
 export { implementation } from './implementation'
 export {
   DboCollectionsMapper,
-  Server as Server,
   dboMapper,
-  server,
+  Server,
 } from './infrastructure'
 export { Logger } from './logger'
 export { NODE_ENV } from './node-env'
@@ -45,6 +44,12 @@ export {
   Environment,
   eventController,
   socketAuthProvider,
+  httpController,
+  ExpressRouter,
+  FindMyWayRouter,
+  type HttpRequest,
+  type HttpResponse,
+  type HttpController,
   type SocketEmit,
   type SocketCallback,
   type SocketListener,

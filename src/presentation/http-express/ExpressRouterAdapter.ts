@@ -19,8 +19,9 @@ export class ExpressRouter implements HttpRouter {
     fnMethod.apply(this.expressRouter, [
       path,
       async (_req: any, _res: any, _next: any) => {
-        const rres = await listener(_req, _res)
+        await listener(_req, _res)
         _next()
+        _res.end()
       },
     ])
   }

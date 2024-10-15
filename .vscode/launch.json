@@ -6,9 +6,15 @@
   "configurations": [
     {
       "type": "node-terminal",
-      "name": "Test",
+      "name": "Test All",
       "request": "launch",
       "command": "npm run test",
+    },
+    {
+      "type": "node-terminal",
+      "name": "Test Integration",
+      "request": "launch",
+      "command": "npm run test:integration",
     }
   ]
 }

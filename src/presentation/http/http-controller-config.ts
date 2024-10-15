@@ -8,7 +8,7 @@ export type HttpControllerConfigForUseCase = {
   method: HttpMethod
   path: string
   useCase: Constructor<UseCase<any, any>>
-  responseFormat: HttpFormat
+  responseFormat?: HttpFormat
 }
 
 export type HttpControllerConfig =
