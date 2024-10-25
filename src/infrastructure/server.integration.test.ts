@@ -23,7 +23,7 @@ function variants() {
 }
 
 function methods() {
-  return ['GET', 'POST'] as const
+  return ['GET', 'POST', 'PUT', 'DELETE'] as const
 }
 
 variants().forEach((variant) => {
@@ -61,6 +61,47 @@ variants().forEach((variant) => {
           },
         )
         assert.equal(response.status, 200)
+      })
+    })
+
+    methods().forEach((method) => {
+      test(`${method} to useCase should format in JSON by defaut`, async () => {
+        const path = '/use-case-with-default-format'
+        const sendData = { foo: 'data' }
+
+        @useCase()
+        class MyUseCase {
+          async perform() {
+            return sendData
+          }
+        }
+
+        new Server(
+          {
+            controllers: [
+              {
+                path,
+                method,
+                useCase: MyUseCase,
+              },
+            ],
+          },
+          variant.router,
+        )
+
+        const response = await fetch(
+          `http://localhost:${variant.port}${path}`,
+          {
+            method,
+          },
+        )
+        assert.equal(response.status, 200)
+        const responseText = new TextDecoder().decode(
+          await new Response(response.body).arrayBuffer(),
+        )
+        assert.equal(response.headers.get('Content-Type'), 'application/json')
+        const receivedData = JSON.parse(responseText)
+        assert.deepEqual(receivedData, sendData)
       })
     })
 

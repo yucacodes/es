@@ -43,7 +43,9 @@ export class HttpControllerWrapper {
         const requestContainer = this.pupulateRequestContainer(req, res)
         const controller = requestContainer.resolve(ctor)
         const fnMethod = controller[method]
-        if (!fnMethod) return res.send(404)
+        if (!fnMethod) {
+          return res.status(404).empty()
+        }
         return await fnMethod.apply(controller, [req, res])
       })
     }
@@ -54,7 +56,12 @@ export class HttpControllerWrapper {
       const requestContainer = this.pupulateRequestContainer(req, res)
       const useCase = requestContainer.resolve(config.useCase)
       const result = await useCase.perform(req.allData())
-      return res.send(200, config.responseFormat, result)
+      res.status(200)
+      switch (config.responseFormat) {
+        case undefined:
+        case 'json':
+          return res.json(result)
+      }
     })
   }
 
@@ -65,7 +72,7 @@ export class HttpControllerWrapper {
   ) {
     this.router.on(method, path, async (_req, _res) => {
       const req = new HttpRequest(_req)
-      const res = new HttpResponse(req)
+      const res = new HttpResponse(_req, _res)
       await this.runMiddlewares(req, res)
       await handler(req, res)
       return res
@@ -93,7 +100,7 @@ export class HttpControllerWrapper {
         if (!middleware) return resolve()
         try {
           index++
-          middleware(req, res, handleNext)
+          middleware(req, res.res, handleNext)
         } catch (err) {
           return reject(err)
         }

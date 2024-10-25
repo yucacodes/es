@@ -40,19 +40,19 @@ describe(`${HttpControllerWrapper.name}`, () => {
         class MyHttpController {
           async GET(req: HttpRequest, res: HttpResponse) {
             handledMethod = 'GET'
-            return res.send(200)
+            return res.empty()
           }
           async POST(req: HttpRequest, res: HttpResponse) {
             handledMethod = 'POST'
-            return res.send(200)
+            return res.empty()
           }
           async PUT(req: HttpRequest, res: HttpResponse) {
             handledMethod = 'PUT'
-            return res.send(200)
+            return res.empty()
           }
           async DELETE(req: HttpRequest, res: HttpResponse) {
             handledMethod = 'DELETE'
-            return res.send(200)
+            return res.empty()
           }
         }
 
@@ -118,7 +118,7 @@ describe(`${HttpControllerWrapper.name}`, () => {
       class MyHttpController {
         async ALL(req: HttpRequest, res: HttpResponse) {
           methodsCalls.push(req.method!)
-          return res.send(200)
+          return res.status(200).empty()
         }
       }
 
@@ -151,7 +151,7 @@ describe(`${HttpControllerWrapper.name}`, () => {
     @httpController({ path })
     class MyHttpController {
       async ALL(req: HttpRequest, res: HttpResponse) {
-        return res.send(200)
+        return res.empty()
       }
     }
 
@@ -186,7 +186,7 @@ describe(`${HttpControllerWrapper.name}`, () => {
     @httpController({ path })
     class MyHttpController {
       async ALL(req: HttpRequest, res: HttpResponse) {
-        return res.send(200)
+        return res.empty()
       }
     }
 

@@ -12,6 +12,12 @@
     },
     {
       "type": "node-terminal",
+      "name": "Test Units",
+      "request": "launch",
+      "command": "npm run test:units",
+    },
+    {
+      "type": "node-terminal",
       "name": "Test Integration",
       "request": "launch",
       "command": "npm run test:integration",

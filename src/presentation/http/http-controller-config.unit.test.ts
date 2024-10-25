@@ -63,13 +63,13 @@ describe('Http controller config', () => {
     class MyController {
       async any() {}
       async DELETE(req: HttpRequest, res: HttpResponse) {
-        return res.send(200)
+        return res.empty()
       }
       async other(req: HttpRequest, res: HttpResponse) {
-        return res.send(200)
+        return res.empty()
       }
       async GET(req: HttpRequest, res: HttpResponse) {
-        return res.send(200)
+        return res.empty()
       }
     }
 
