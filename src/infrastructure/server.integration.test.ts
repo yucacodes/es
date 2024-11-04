@@ -5,6 +5,7 @@ import test, { after, before, describe } from 'node:test'
 import { useCase } from '../application'
 import { ExpressRouter } from '../presentation/http-express/ExpressRouterAdapter'
 import { Server } from './server'
+import { httpController, HttpRequest, HttpResponse } from '../presentation'
 
 function expressVariant() {
   const expressRouter = express()
@@ -54,12 +55,9 @@ variants().forEach((variant) => {
           variant.router,
         )
 
-        const response = await fetch(
-          `http://localhost:${variant.port}${path}`,
-          {
-            method,
-          },
-        )
+        const response = await fetch(`http://localhost:${variant.port}${path}`, {
+          method,
+        })
         assert.equal(response.status, 200)
       })
     })
@@ -89,19 +87,47 @@ variants().forEach((variant) => {
           variant.router,
         )
 
-        const response = await fetch(
-          `http://localhost:${variant.port}${path}`,
-          {
-            method,
-          },
-        )
+        const response = await fetch(`http://localhost:${variant.port}${path}`, {
+          method,
+        })
         assert.equal(response.status, 200)
-        const responseText = new TextDecoder().decode(
-          await new Response(response.body).arrayBuffer(),
-        )
+        const responseText = new TextDecoder().decode(await new Response(response.body).arrayBuffer())
         assert.equal(response.headers.get('Content-Type'), 'application/json')
         const receivedData = JSON.parse(responseText)
         assert.deepEqual(receivedData, sendData)
+      })
+    })
+
+    methods().forEach((method) => {
+      test(`${method} controller should parse query params`, async () => {
+        const path = `/${method}-controller-parse-query`
+        const query: { [ket: string]: string } = {
+          param1: 'value',
+          param2: 'many words',
+        }
+
+        @httpController({ path })
+        class MyController {
+          async [method](req: HttpRequest, res: HttpResponse) {
+            assert.deepEqual(req.query, query)
+            return res.empty()
+          }
+        }
+
+        new Server(
+          {
+            controllers: [MyController],
+          },
+          variant.router,
+        )
+        const url = new URL(`http://localhost:${variant.port}${path}`)
+        Object.keys(query).forEach((key) => {
+          url.searchParams.set(key, query[key])
+        })
+
+        await fetch(url, {
+          method,
+        })
       })
     })
 
