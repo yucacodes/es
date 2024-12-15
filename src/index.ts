@@ -37,6 +37,7 @@ export {
   DboCollectionsMapper,
   dboMapper,
   Server,
+  EasyServer,
 } from './infrastructure'
 export { Logger } from './logger'
 export { NODE_ENV } from './node-env'
